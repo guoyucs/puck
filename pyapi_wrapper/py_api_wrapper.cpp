@@ -168,5 +168,18 @@ int PySearcher::search(uint32_t n, const float* query_fea, const uint32_t topk, 
 
     return 0;
 }
+
+int PySearcher::search_single(const float* query_fea, const uint32_t topk, float* distance,
+                       uint32_t* labels) {
+    puck::Request request;
+    puck::Response response;
+    request.topk = topk;
+    request.feature = query_fea;
+    response.distance = distance;
+    response.local_idx = labels;
+    _index->search(&request, &response);
+    return 0;
+}
+
 PySearcher::~PySearcher() {};
 };//namespace py_puck_api
