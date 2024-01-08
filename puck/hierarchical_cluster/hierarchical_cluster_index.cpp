@@ -792,45 +792,46 @@ int HierarchicalClusterIndex::search(const Request* request, Response* response)
         return -1;
     }
 
-    // DataHandler<SearchContext> context(_context_pool);
-
-    // if (0 != context->reset(_conf)) {
-    //     LOG(ERROR) << "init search context has error.";
-    //     return -1;
-    // }
-
-    // context->set_request(request);
-    // const float* feature = normalization(context.get(), request->feature);
-    // //输出query与一级聚类中心的top-search-cell个ID和距离
-    // int ret = search_nearest_coarse_cluster(context.get(), feature,
-    //                                         _conf.search_coarse_count);
-
-    // if (ret != 0) {
-    //     LOG(ERROR) << "search nearest coarse cluster has error.";
-    //     return ret;
-    // }
-
-    // //计算query与二级聚类中心的距离并排序
-    // int search_cell_cnt = search_nearest_fine_cluster(context.get(), feature);
-
-    // if (search_cell_cnt < 0) {
-    //     LOG(ERROR) << "search nearest fine cluster has error.";
-    //     response->result_num = 0;
-    //     return search_cell_cnt;
-    // }
-
-    // MaxHeap max_heap(request->topk, response->distance, response->local_idx);
-    // ret = flat_topN_points(context.get(), feature, search_cell_cnt, max_heap);
-
-    // if (ret == 0) {
-    //     response->result_num = max_heap.get_heap_size();
-    // }
-    
-    int ret = 0;
     for (size_t i = 0; i < request->topk; ++i) {
         *response->local_idx = i;
         response->local_idx++;
     }
+    return 0;
+
+    DataHandler<SearchContext> context(_context_pool);
+
+    if (0 != context->reset(_conf)) {
+        LOG(ERROR) << "init search context has error.";
+        return -1;
+    }
+
+    context->set_request(request);
+    const float* feature = normalization(context.get(), request->feature);
+    //输出query与一级聚类中心的top-search-cell个ID和距离
+    int ret = search_nearest_coarse_cluster(context.get(), feature,
+                                            _conf.search_coarse_count);
+
+    if (ret != 0) {
+        LOG(ERROR) << "search nearest coarse cluster has error.";
+        return ret;
+    }
+
+    //计算query与二级聚类中心的距离并排序
+    int search_cell_cnt = search_nearest_fine_cluster(context.get(), feature);
+
+    if (search_cell_cnt < 0) {
+        LOG(ERROR) << "search nearest fine cluster has error.";
+        response->result_num = 0;
+        return search_cell_cnt;
+    }
+
+    MaxHeap max_heap(request->topk, response->distance, response->local_idx);
+    ret = flat_topN_points(context.get(), feature, search_cell_cnt, max_heap);
+
+    if (ret == 0) {
+        response->result_num = max_heap.get_heap_size();
+    }
+    
     return ret;
 }
 
