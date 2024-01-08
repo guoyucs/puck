@@ -516,6 +516,7 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
     //过滤阈值
     float pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
 
+    return 0;
     for (uint32_t l = 0; l < _conf.search_coarse_count; ++l) {
         int coarse_id = coarse_tag[l];
         //计算query与当前一级聚类中心下cell的距离
@@ -579,6 +580,12 @@ int PuckIndex::search(const Request* request, Response* response) {
         return ret;
     }
 
+    //计算query与二级聚类中心的距离，并根据filter特征，筛选子集
+    int search_point_cnt = search_nearest_filter_points(context.get(), feature);
+    if (search_point_cnt < 0) {
+        LOG(ERROR) << "search filter points has error.";
+        return -1;
+    }
 
 
     for (size_t i = 0; i < request->topk; ++i) {
@@ -586,14 +593,6 @@ int PuckIndex::search(const Request* request, Response* response) {
         (response->local_idx)++;
     }
     return 0;
-
-    //计算query与二级聚类中心的距离，并根据filter特征，筛选子集
-    int search_point_cnt = search_nearest_filter_points(context.get(), feature);
-
-    if (search_point_cnt < 0) {
-        LOG(ERROR) << "search filter points has error.";
-        return -1;
-    }
 
     MaxHeap result_heap(request->topk, response->distance, response->local_idx);
     ret = rank_topN_points(context.get(), feature, search_point_cnt, result_heap);
