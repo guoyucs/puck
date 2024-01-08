@@ -529,6 +529,7 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
         float max_stationary_dist = pivot - coarse_distance[l] -
                                     search_cell_data.fine_distance[0];
         LOG(INFO) << "Record1:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record1).count();
+        auto record2 = std::chrono::system_clock::now();
         for (uint32_t idx = 0; idx < _conf.fine_cluster_count; ++idx) {
             if (search_cell_data.fine_distance[idx] + min_dist >= pivot) {
                 //LOG(INFO)<<l<<" "<<idx<<" break;";
@@ -541,11 +542,9 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
                 continue;
             }
 
-            auto record2 = std::chrono::system_clock::now();
             float temp_dist = coarse_distance[l] + cur_fine_cluster_list[k].stationary_cell_dist +
                               search_cell_data.fine_distance[idx];
             int updated_cnt = compute_quantized_distance(context, cur_fine_cluster_list + k, temp_dist, filter_heap);
-            LOG(INFO) << "Record2:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record2).count();
             if (updated_cnt > 0) {
                 pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
             }
@@ -553,6 +552,7 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
             max_stationary_dist = std::min(max_stationary_dist,
                                            pivot - coarse_distance[l] - search_cell_data.fine_distance[idx]);
         }
+        LOG(INFO) << "Record2:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record2).count();
     }
 
     if (filter_heap.get_heap_size() < _conf.filter_topk) {
