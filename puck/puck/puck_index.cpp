@@ -381,7 +381,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
 
 #endif
         if (temp_dist < result_distance[0]) {
-            result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
+            // result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
         }
     }
@@ -583,17 +583,18 @@ int PuckIndex::search(const Request* request, Response* response) {
     //计算query与二级聚类中心的距离，并根据filter特征，筛选子集
     int search_point_cnt = search_nearest_filter_points(context.get(), feature);
 
-    if (search_point_cnt < 0) {
-        LOG(ERROR) << "search filter points has error.";
-        return -1;
-    }
-
     for (size_t i = 0; i < request->topk; ++i) {
         *(response->local_idx) = i;
         (response->local_idx)++;
     }
     return 0;
 
+
+    if (search_point_cnt < 0) {
+        LOG(ERROR) << "search filter points has error.";
+        return -1;
+    }
+    
     MaxHeap result_heap(request->topk, response->distance, response->local_idx);
     ret = rank_topN_points(context.get(), feature, search_point_cnt, result_heap);
 
