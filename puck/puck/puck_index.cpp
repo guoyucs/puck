@@ -354,7 +354,6 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
 
-    LOG(INFO) << "EZRA nsq:" <<quantization_params.nsq << ",ks:"<<quantization_params.ks;
     for (uint32_t i = 0; i < point_cnt; ++i) {
         const unsigned char* feature = _filter_quantization->get_quantized_feature(
                                            cur_fine_cluster->memory_idx_start + i);
