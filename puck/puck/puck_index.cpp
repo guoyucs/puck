@@ -364,9 +364,9 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
-// #ifdef __SSE__
-//         temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
-// #else
+#ifdef __SSE__
+        temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
+#else
 
         for (uint32_t m = 0; m < (uint32_t)quantization_params.nsq; ++m) {
             uint32_t idx = query_sorted_tag[m];
@@ -379,9 +379,8 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
             }
         }
 
+#endif
         temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
-
-// #endif
         if (temp_dist < result_distance[0]) {
             result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
