@@ -19,6 +19,7 @@
  * @brief
  *
  **/
+#include <chrono>
 #include <thread>
 #include <omp.h>
 #include <functional>
@@ -374,16 +375,16 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
             auto dist = (pq_dist_table + idx * quantization_params.ks)[pq_idx];
             temp_dist += dist;
             // 当PQ子空间累计距离已经大于当前最大值，不再计算
-            // if (temp_dist > result_distance[0]) {
-            //     break;
-            // }
+            if (temp_dist > result_distance[0]) {
+                break;
+            }
         }
 // #endif
 
-        // if (temp_dist < result_distance[0]) {
+        if (temp_dist < result_distance[0]) {
             // result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
-            // ++updated_cnt;
-        // }
+            ++updated_cnt;
+        }
     }
 
     return 0;
@@ -483,6 +484,7 @@ int PuckIndex::pre_filter_search(SearchContext* context, const float* feature) {
 }
 
 int PuckIndex::search_nearest_filter_points(SearchContext* context, const float* feature) {
+    auto start = std::chrono::system_clock::now();
     if (pre_filter_search(context, feature) != 0) {
         LOG(ERROR) << "cmp filter dist table failed" ;
         return -1;
