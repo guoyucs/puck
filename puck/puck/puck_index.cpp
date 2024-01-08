@@ -354,7 +354,10 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
 
-    for (uint32_t i = 0; i < point_cnt; ++i) {
+    int dist_cost = 0;
+    int heap_cost = 0;
+    uint32_t i = 0;
+    for (; i < point_cnt; ++i) {
         const unsigned char* feature = _filter_quantization->get_quantized_feature(
                                            cur_fine_cluster->memory_idx_start + i);
         float temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
@@ -363,6 +366,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
             break;
         }
 
+        auto record = std::chrono::system_clock::now();
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
 #ifdef __SSE__
         temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
@@ -379,11 +383,18 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
 #endif
-
+        dist_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+        record = std::chrono::system_clock::now();
         if (temp_dist < result_distance[0]) {
             result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
         }
+        heap_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+    }
+    if (i == 0) {
+        LOG(INFO) << "RecordDist:" << dist_cost << " : " << heap_cost;
+    } else {
+        LOG(INFO) << "RecordDist:" << dist_cost/i << " : " << heap_cost/i;
     }
 
     return updated_cnt;
