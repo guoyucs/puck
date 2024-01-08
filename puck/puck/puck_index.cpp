@@ -369,6 +369,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
 // #else
 
         for (uint32_t m = 0; m < (uint32_t)quantization_params.nsq; ++m) {
+            continue;
             uint32_t idx = query_sorted_tag[m];
             temp_dist += (pq_dist_table + idx * quantization_params.ks)[pq_feature[idx]];
 
