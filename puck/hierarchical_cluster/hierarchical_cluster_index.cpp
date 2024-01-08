@@ -787,13 +787,6 @@ int HierarchicalClusterIndex::search_nearest_fine_cluster(SearchContext* context
 }
 
 int HierarchicalClusterIndex::search(const Request* request, Response* response) {
-    for (size_t i = 0; i < request->topk; ++i) {
-        *(response->local_idx) = i;
-        (response->local_idx)++;
-    }
-    LOG(INFO) << "EZRA SEARCH" << _conf.topk;
-    return 0;
-
     if (request->topk > _conf.topk || request->feature == nullptr) {
         LOG(ERROR) << "topk should <= topk, topk = " << _conf.topk << ", or feature is nullptr";
         return -1;

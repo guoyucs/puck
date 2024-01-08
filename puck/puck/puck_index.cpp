@@ -557,6 +557,12 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
 }
 
 int PuckIndex::search(const Request* request, Response* response) {
+    for (size_t i = 0; i < request->topk; ++i) {
+        *(response->local_idx) = i;
+        (response->local_idx)++;
+    }
+    return 0;
+
     if (request->topk > _conf.topk || request->feature == nullptr) {
         LOG(ERROR) << "topk should <= topk, topk = " << _conf.topk << ", or feature is nullptr";
         return -1;
