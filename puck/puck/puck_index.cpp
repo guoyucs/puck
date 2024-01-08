@@ -372,14 +372,14 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
             uint32_t idx = query_sorted_tag[m];
             auto pq_idx = pq_feature[idx];
             auto dist = (pq_dist_table + idx * quantization_params.ks)[pq_idx];
-            continue;
             temp_dist += dist;
-
             //当PQ子空间累计距离已经大于当前最大值，不再计算
             if (temp_dist > result_distance[0]) {
                 break;
             }
         }
+
+        temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
 
 // #endif
         if (temp_dist < result_distance[0]) {
