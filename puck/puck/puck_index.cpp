@@ -579,6 +579,14 @@ int PuckIndex::search(const Request* request, Response* response) {
         return ret;
     }
 
+
+
+    for (size_t i = 0; i < request->topk; ++i) {
+        *(response->local_idx) = i;
+        (response->local_idx)++;
+    }
+    return 0;
+
     //计算query与二级聚类中心的距离，并根据filter特征，筛选子集
     int search_point_cnt = search_nearest_filter_points(context.get(), feature);
 
@@ -586,12 +594,6 @@ int PuckIndex::search(const Request* request, Response* response) {
         LOG(ERROR) << "search filter points has error.";
         return -1;
     }
-
-    for (size_t i = 0; i < request->topk; ++i) {
-        *(response->local_idx) = i;
-        (response->local_idx)++;
-    }
-    return 0;
 
     MaxHeap result_heap(request->topk, response->distance, response->local_idx);
     ret = rank_topN_points(context.get(), feature, search_point_cnt, result_heap);
