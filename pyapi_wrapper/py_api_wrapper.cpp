@@ -178,6 +178,7 @@ int PySearcher::search_single(const float* query_fea, const uint32_t topk, float
     response.distance = distance;
     response.local_idx = labels;
     _index->search(&request, &response);
+    return 0;
 }
 
 PySearcher::~PySearcher() {};
