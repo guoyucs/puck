@@ -171,6 +171,12 @@ int PySearcher::search(uint32_t n, const float* query_fea, const uint32_t topk, 
 
 int PySearcher::search_single(const float* query_fea, const uint32_t topk, float* distance,
                        uint32_t* labels) {
+    // EZRA search_single
+    for (size_t i = 0; i < topk; ++i) {
+        *labels = i;
+        labels++;
+    }
+    return 0;
     puck::Request request;
     puck::Response response;
     request.topk = topk;
@@ -178,7 +184,6 @@ int PySearcher::search_single(const float* query_fea, const uint32_t topk, float
     response.distance = distance;
     response.local_idx = labels;
     _index->search(&request, &response);
-    return 0;
 }
 
 PySearcher::~PySearcher() {};
