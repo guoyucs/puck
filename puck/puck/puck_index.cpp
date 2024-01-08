@@ -385,9 +385,9 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
             ++updated_cnt;
         }
     }
-    LOG(INFO) << "update_cnt:" << updated_cnt;
+    // LOG(INFO) << "update_cnt:" << updated_cnt;
 
-    return updated_cnt;
+    return 0;
 }
 
 int PuckIndex::rank_topN_points(SearchContext* context, const float* feature, const uint32_t filter_topk,
