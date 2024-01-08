@@ -517,7 +517,7 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
     float pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
 
     // return 0;
-    LOG(INFO) << "search_coarse_count:" << _conf.search_coarse_count << ",fine_cluster_count:" <<  _conf.fine_cluster_count;
+    // LOG(INFO) << "search_coarse_count:" << _conf.search_coarse_count << ",fine_cluster_count:" <<  _conf.fine_cluster_count;
     for (uint32_t l = 0; l < _conf.search_coarse_count; ++l) {
         int coarse_id = coarse_tag[l];
         //计算query与当前一级聚类中心下cell的距离
@@ -538,6 +538,7 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
                 continue;
             }
 
+            continue;
             float temp_dist = coarse_distance[l] + cur_fine_cluster_list[k].stationary_cell_dist +
                               search_cell_data.fine_distance[idx];
             int updated_cnt = compute_quantized_distance(context, cur_fine_cluster_list + k, temp_dist, filter_heap);
