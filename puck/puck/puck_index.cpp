@@ -345,7 +345,7 @@ int PuckIndex::init_model_memory() {
 
 int PuckIndex::compute_quantized_distance(SearchContext* context, const FineCluster* cur_fine_cluster,
         const float cell_dist, MaxHeap& result_heap) {
-    auto record = std::chrono::system_clock::now();
+    auto record_all = std::chrono::system_clock::now();
     float* result_distance = result_heap.get_top_addr();
     const float* pq_dist_table = context->get_search_point_data().pq_dist_table;
 
@@ -354,7 +354,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     uint32_t* query_sorted_tag = context->get_search_point_data().query_sorted_tag;
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
-    int init_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+    int init_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record_all).count();
 
     int feat_cost = 0;
     int dist_cost = 0;
@@ -396,7 +396,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
         heap_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
     }
-    int all_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+    int all_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record_all).count();
     LOG(INFO) << "RecordDist:" << all_cost << ":" << init_cost << ":" << i << ":" << feat_cost << ":" << dist_cost << ":" << heap_cost;
 
     return updated_cnt;
