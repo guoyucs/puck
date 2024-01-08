@@ -364,7 +364,6 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
-        continue;
 #ifdef __SSE__
         temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
 #else
@@ -380,7 +379,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
 #endif
-
+        continue;
         if (temp_dist < result_distance[0]) {
             result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
