@@ -391,11 +391,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
         heap_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
     }
-    if (i == 0) {
-        LOG(INFO) << "RecordDist:" << dist_cost << " : " << heap_cost;
-    } else {
-        LOG(INFO) << "RecordDist:" << dist_cost/i << " : " << heap_cost/i;
-    }
+    LOG(INFO) << "RecordDist:" << i << ":" << dist_cost << ":" << heap_cost;
 
     return updated_cnt;
 }
