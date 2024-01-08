@@ -360,9 +360,9 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
                                            cur_fine_cluster->memory_idx_start + i);
         float temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
 
-        // if (temp_dist >= result_distance[0]) {
-        //     break;
-        // }
+        if (temp_dist >= result_distance[0]) {
+            break;
+        }
 
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
 // #ifdef __SSE__
