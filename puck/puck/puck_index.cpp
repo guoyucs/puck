@@ -364,29 +364,29 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         // }
 
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
-#ifdef __SSE__
+// #ifdef __SSE__
         // temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
-#else
+// #else
 
         for (uint32_t m = 0; m < (uint32_t)quantization_params.nsq; ++m) {
             uint32_t idx = query_sorted_tag[m];
             auto pq_idx = pq_feature[idx];
             auto dist = (pq_dist_table + idx * quantization_params.ks)[pq_idx];
             temp_dist += dist;
-            //当PQ子空间累计距离已经大于当前最大值，不再计算
-            if (temp_dist > result_distance[0]) {
-                break;
-            }
+            // 当PQ子空间累计距离已经大于当前最大值，不再计算
+            // if (temp_dist > result_distance[0]) {
+            //     break;
+            // }
         }
-#endif
+// #endif
 
-        if (temp_dist < result_distance[0]) {
-            result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
-            ++updated_cnt;
-        }
+        // if (temp_dist < result_distance[0]) {
+            // result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
+            // ++updated_cnt;
+        // }
     }
 
-    return updated_cnt;
+    return 0;
 }
 
 int PuckIndex::rank_topN_points(SearchContext* context, const float* feature, const uint32_t filter_topk,
