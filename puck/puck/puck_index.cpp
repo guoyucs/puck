@@ -387,7 +387,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     }
     // LOG(INFO) << "update_cnt:" << updated_cnt;
 
-    return 0;
+    return updated_cnt;
 }
 
 int PuckIndex::rank_topN_points(SearchContext* context, const float* feature, const uint32_t filter_topk,
@@ -587,6 +587,12 @@ int PuckIndex::search(const Request* request, Response* response) {
         LOG(ERROR) << "search filter points has error.";
         return -1;
     }
+
+    for (size_t i = 0; i < request->topk; ++i) {
+        *(response->local_idx) = i;
+        (response->local_idx)++;
+    }
+    return 0;
 
     MaxHeap result_heap(request->topk, response->distance, response->local_idx);
     ret = rank_topN_points(context.get(), feature, search_point_cnt, result_heap);
