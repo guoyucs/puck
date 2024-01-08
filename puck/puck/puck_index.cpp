@@ -353,8 +353,6 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     uint32_t* query_sorted_tag = context->get_search_point_data().query_sorted_tag;
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
-    LOG(INFO) << "EZRA_point_cnt:" << point_cnt;
-    return -1;
 
     for (uint32_t i = 0; i < point_cnt; ++i) {
         const unsigned char* feature = _filter_quantization->get_quantized_feature(
@@ -366,6 +364,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
+        continue;
 #ifdef __SSE__
         temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
 #else
