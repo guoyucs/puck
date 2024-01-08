@@ -382,7 +382,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
 // #endif
 
         if (temp_dist < result_distance[0]) {
-            // result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
+            result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
         }
     }
@@ -490,6 +490,8 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
         return -1;
     }
 
+    auto record0 = std::chrono::system_clock::now();
+
     SearchCellData& search_cell_data = context->get_search_cell_data();
     float* cluster_inner_product = search_cell_data.cluster_inner_product;
 
@@ -517,15 +519,17 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
     float query_norm = cblas_sdot(_conf.feature_dim, feature, 1, feature, 1);
     //过滤阈值
     float pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
+    LOG(INFO) << "Record0:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record0).count();
 
     for (uint32_t l = 0; l < _conf.search_coarse_count; ++l) {
+        auto record1 = std::chrono::system_clock::now();
         int coarse_id = coarse_tag[l];
         //计算query与当前一级聚类中心下cell的距离
         FineCluster* cur_fine_cluster_list = _coarse_clusters[coarse_id].fine_cell_list;
         float min_dist = _coarse_clusters[coarse_id].min_dist_offset + coarse_distance[l];
         float max_stationary_dist = pivot - coarse_distance[l] -
                                     search_cell_data.fine_distance[0];
-
+        LOG(INFO) << "Record1:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record1).count();
         for (uint32_t idx = 0; idx < _conf.fine_cluster_count; ++idx) {
             if (search_cell_data.fine_distance[idx] + min_dist >= pivot) {
                 //LOG(INFO)<<l<<" "<<idx<<" break;";
@@ -538,10 +542,11 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
                 continue;
             }
 
+            auto record2 = std::chrono::system_clock::now();
             float temp_dist = coarse_distance[l] + cur_fine_cluster_list[k].stationary_cell_dist +
                               search_cell_data.fine_distance[idx];
             int updated_cnt = compute_quantized_distance(context, cur_fine_cluster_list + k, temp_dist, filter_heap);
-
+            LOG(INFO) << "Record2:" << std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record2).count();
             if (updated_cnt > 0) {
                 pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
             }
