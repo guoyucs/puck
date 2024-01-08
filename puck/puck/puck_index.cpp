@@ -345,7 +345,6 @@ int PuckIndex::init_model_memory() {
 
 int PuckIndex::compute_quantized_distance(SearchContext* context, const FineCluster* cur_fine_cluster,
         const float cell_dist, MaxHeap& result_heap) {
-    auto record_all = std::chrono::system_clock::now();
     float* result_distance = result_heap.get_top_addr();
     const float* pq_dist_table = context->get_search_point_data().pq_dist_table;
 
@@ -354,50 +353,50 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     uint32_t* query_sorted_tag = context->get_search_point_data().query_sorted_tag;
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
-    int init_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record_all).count();
 
     int feat_cost = 0;
     int dist_cost = 0;
     int heap_cost = 0;
     uint32_t i = 0;
+    auto record_all = std::chrono::system_clock::now();
     for (; i < point_cnt; ++i) {
-        auto record = std::chrono::system_clock::now();
-        const unsigned char* feature = _filter_quantization->get_quantized_feature(
-                                           cur_fine_cluster->memory_idx_start + i);
-        float temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
+//         auto record = std::chrono::system_clock::now();
+//         const unsigned char* feature = _filter_quantization->get_quantized_feature(
+//                                            cur_fine_cluster->memory_idx_start + i);
+//         float temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
 
-        if (temp_dist >= result_distance[0]) {
-            feat_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
-            break;
-        }
-        feat_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
-        record = std::chrono::system_clock::now();
-        const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
-#ifdef __SSE__
-        temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
-#else
+//         if (temp_dist >= result_distance[0]) {
+//             feat_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+//             break;
+//         }
+//         feat_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+//         record = std::chrono::system_clock::now();
+//         const unsigned char* pq_feature = (unsigned char*)feature + _filter_quantization->get_fea_offset();
+// #ifdef __SSE__
+//         temp_dist += lookup_dist_table(pq_feature, pq_dist_table, quantization_params.ks, quantization_params.nsq);
+// #else
 
-        for (uint32_t m = 0; m < (uint32_t)quantization_params.nsq; ++m) {
-            uint32_t idx = query_sorted_tag[m];
-            temp_dist += (pq_dist_table + idx * quantization_params.ks)[pq_feature[idx]];
+//         for (uint32_t m = 0; m < (uint32_t)quantization_params.nsq; ++m) {
+//             uint32_t idx = query_sorted_tag[m];
+//             temp_dist += (pq_dist_table + idx * quantization_params.ks)[pq_feature[idx]];
 
-            //当PQ子空间累计距离已经大于当前最大值，不再计算
-            if (temp_dist > result_distance[0]) {
-                break;
-            }
-        }
+//             //当PQ子空间累计距离已经大于当前最大值，不再计算
+//             if (temp_dist > result_distance[0]) {
+//                 break;
+//             }
+//         }
 
-#endif
-        dist_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
-        record = std::chrono::system_clock::now();
-        if (temp_dist < result_distance[0]) {
-            result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
-            ++updated_cnt;
-        }
-        heap_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+// #endif
+//         dist_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
+//         record = std::chrono::system_clock::now();
+//         if (temp_dist < result_distance[0]) {
+//             result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
+//             ++updated_cnt;
+//         }
+//         heap_cost += std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record).count();
     }
     int all_cost = std::chrono::duration_cast<std::chrono::nanoseconds>(std::chrono::system_clock::now() - record_all).count();
-    LOG(INFO) << "RecordDist:" << all_cost << ":" << init_cost << ":" << i << ":" << feat_cost << ":" << dist_cost << ":" << heap_cost;
+    LOG(INFO) << "RecordDist:" << all_cost << ":" << i << ":" << feat_cost << ":" << dist_cost << ":" << heap_cost;
 
     return updated_cnt;
 }
