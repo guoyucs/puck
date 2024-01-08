@@ -387,7 +387,7 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
     }
 
-    return 0;
+    return updated_cnt;
 }
 
 int PuckIndex::rank_topN_points(SearchContext* context, const float* feature, const uint32_t filter_topk,
@@ -484,7 +484,6 @@ int PuckIndex::pre_filter_search(SearchContext* context, const float* feature) {
 }
 
 int PuckIndex::search_nearest_filter_points(SearchContext* context, const float* feature) {
-    auto start = std::chrono::system_clock::now();
     if (pre_filter_search(context, feature) != 0) {
         LOG(ERROR) << "cmp filter dist table failed" ;
         return -1;
@@ -589,11 +588,11 @@ int PuckIndex::search(const Request* request, Response* response) {
     //计算query与二级聚类中心的距离，并根据filter特征，筛选子集
     int search_point_cnt = search_nearest_filter_points(context.get(), feature);
 
-    for (size_t i = 0; i < request->topk; ++i) {
-        *(response->local_idx) = i;
-        (response->local_idx)++;
-    }
-    return 0;
+    // for (size_t i = 0; i < request->topk; ++i) {
+    //     *(response->local_idx) = i;
+    //     (response->local_idx)++;
+    // }
+    // return 0;
 
 
     if (search_point_cnt < 0) {
