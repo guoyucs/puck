@@ -353,6 +353,8 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
     uint32_t* query_sorted_tag = context->get_search_point_data().query_sorted_tag;
     auto point_cnt = cur_fine_cluster->get_point_cnt();
     uint32_t updated_cnt = 0;
+    LOG(INFO) << "EZRA_point_cnt:" << point_cnt;
+    return -1;
 
     for (uint32_t i = 0; i < point_cnt; ++i) {
         const unsigned char* feature = _filter_quantization->get_quantized_feature(
@@ -516,7 +518,6 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
     //过滤阈值
     float pivot = (filter_heap.get_top_addr()[0] - query_norm) / _conf.radius_rate / 2.0;
 
-    // return 0;
     // LOG(INFO) << "search_coarse_count:" << _conf.search_coarse_count << ",fine_cluster_count:" <<  _conf.fine_cluster_count;
     for (uint32_t l = 0; l < _conf.search_coarse_count; ++l) {
         int coarse_id = coarse_tag[l];
@@ -538,7 +539,6 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
                 continue;
             }
 
-            continue;
             float temp_dist = coarse_distance[l] + cur_fine_cluster_list[k].stationary_cell_dist +
                               search_cell_data.fine_distance[idx];
             int updated_cnt = compute_quantized_distance(context, cur_fine_cluster_list + k, temp_dist, filter_heap);
