@@ -380,12 +380,12 @@ int PuckIndex::compute_quantized_distance(SearchContext* context, const FineClus
         }
 
 #endif
-        // temp_dist = 2.0 * cell_dist + ((float*)feature)[0];
         if (temp_dist < result_distance[0]) {
             result_heap.max_heap_update(temp_dist, cur_fine_cluster->memory_idx_start + i);
             ++updated_cnt;
         }
     }
+    LOG(INFO) << "update_cnt:" << updated_cnt;
 
     return updated_cnt;
 }
