@@ -132,6 +132,7 @@ namespace py_puck_api{
             void show();
             int init();
             void search(uint32_t n, const float* x,const uint32_t topk, float* distances, uint32_t* labels);
+            void search_single(const float* x,const uint32_t topk, float* distances, uint32_t* labels);
             ~PySearcher();
     };
 };
