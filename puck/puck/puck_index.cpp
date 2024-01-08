@@ -557,12 +557,6 @@ int PuckIndex::search_nearest_filter_points(SearchContext* context, const float*
 }
 
 int PuckIndex::search(const Request* request, Response* response) {
-    for (size_t i = 0; i < request->topk; ++i) {
-        *(response->local_idx) = i;
-        (response->local_idx)++;
-    }
-    return 0;
-
     if (request->topk > _conf.topk || request->feature == nullptr) {
         LOG(ERROR) << "topk should <= topk, topk = " << _conf.topk << ", or feature is nullptr";
         return -1;
@@ -592,6 +586,12 @@ int PuckIndex::search(const Request* request, Response* response) {
         LOG(ERROR) << "search filter points has error.";
         return -1;
     }
+
+    for (size_t i = 0; i < request->topk; ++i) {
+        *(response->local_idx) = i;
+        (response->local_idx)++;
+    }
+    return 0;
 
     MaxHeap result_heap(request->topk, response->distance, response->local_idx);
     ret = rank_topN_points(context.get(), feature, search_point_cnt, result_heap);
